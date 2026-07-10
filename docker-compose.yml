@@ -1,0 +1,54 @@
+services:
+  # -------------------------------------------------------------
+  # Componente 1: Base de Datos PostgreSQL
+  # -------------------------------------------------------------
+  db:
+    image: postgres:15-alpine
+    container_name: barberia_postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres       # Usuario por defecto para la BD
+      POSTGRES_PASSWORD: Admin1115  # <-- ESCRIBE AQUÍ TU CONTRASEÑA DE LA BASE DE DATOS
+      POSTGRES_DB: barberia_db            # Nombre de la base de datos por defecto
+    ports:
+      - "5432:5432"                       # Puerto estándar de PostgreSQL
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # -------------------------------------------------------------
+  # Componente 2: Administrador Visual (pgAdmin)
+  # -------------------------------------------------------------
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: barberia_pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@barberia.com  # Correo ficticio para iniciar sesión en pgAdmin
+      PGADMIN_DEFAULT_PASSWORD: Admin1115  # <-- ESCRIBE AQUÍ TU CONTRASEÑA PARA ENTRAR A PGADMIN
+    ports:
+      - "5050:80"                         # Entrarás desde el navegador web usando el puerto 5050
+    depends_on:
+      - db                                # pgAdmin esperará a que la base de datos encienda primero
+
+  # -------------------------------------------------------------
+  # Componente 3: Backend (API REST)
+  # -------------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: dockerfile
+    container_name: barberia_backend
+    restart: always
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/barberia_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: Admin1115
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+    ports:
+      - "8080:8080"                       # Puerto para acceder a la API REST
+    depends_on:
+      - db                                # El backend esperará a que la base de datos esté lista
+
+# Volumen para que los datos no se borren cuando apagues Docker
+volumes:
+  postgres_data:
