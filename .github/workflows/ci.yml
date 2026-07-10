@@ -2,7 +2,7 @@ name: CI/CD Spring Boot
 
 on:
     pull_request:
-        branches: [ main ]
+        branches: [ main, development]
 
 jobs:
     build-and-test:
@@ -18,7 +18,7 @@ jobs:
                     distribution: 'temurin'
                     java-version: '21'
                     cache: maven
-                    
+
             - name: Compilar y correr tests
               run: mvn clean verify
               
