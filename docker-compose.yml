@@ -1,54 +1,39 @@
 services:
-  # -------------------------------------------------------------
-  # Componente 1: Base de Datos PostgreSQL
-  # -------------------------------------------------------------
-  db:
-    image: postgres:15-alpine
-    container_name: barberia_postgres_db
-    restart: always
-    environment:
-      POSTGRES_USER: postgres       # Usuario por defecto para la BD
-      POSTGRES_PASSWORD: Admin1115  # <-- ESCRIBE AQUÍ TU CONTRASEÑA DE LA BASE DE DATOS
-      POSTGRES_DB: barberia_db            # Nombre de la base de datos por defecto
-    ports:
-      - "5432:5432"                       # Puerto estándar de PostgreSQL
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-  # -------------------------------------------------------------
-  # Componente 2: Administrador Visual (pgAdmin)
-  # -------------------------------------------------------------
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: barberia_pgadmin
-    restart: always
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@barberia.com  # Correo ficticio para iniciar sesión en pgAdmin
-      PGADMIN_DEFAULT_PASSWORD: Admin1115  # <-- ESCRIBE AQUÍ TU CONTRASEÑA PARA ENTRAR A PGADMIN
-    ports:
-      - "5050:80"                         # Entrarás desde el navegador web usando el puerto 5050
-    depends_on:
-      - db                                # pgAdmin esperará a que la base de datos encienda primero
-
-  # -------------------------------------------------------------
-  # Componente 3: Backend (API REST)
+# -------------------------------------------------------------
+  # Componente: Backend (API REST - Spring Boot)
   # -------------------------------------------------------------
   backend:
     build:
-      context: ./backend
-      dockerfile: dockerfile
-    container_name: barberia_backend
+      context: .              # Ambos archivos están en la raíz del proyecto
+      dockerfile: dockerfile  # Nombre del archivo 100% en minúsculas
+    container_name: flowbox_backend
     restart: always
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/barberia_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: Admin1115
-      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://ep-hidden-breeze-atsz4x4s.c-9.us-east-1.aws.neon.tech/neondb?sslmode=require
+      - SPRING_DATASOURCE_USERNAME=neondb_owner
+      - SPRING_DATASOURCE_PASSWORD=${NEON_DB_PASSWORD}  # Docker leerá esto automáticamente de tu archivo .env local
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
     ports:
-      - "8080:8080"                       # Puerto para acceder a la API REST
-    depends_on:
-      - db                                # El backend esperará a que la base de datos esté lista
+      - "8080:8080"           # Puerto para acceder a tu API REST desde afuera
+    networks:
+      - flowbox-network       # Conectado a la red interna para el futuro frontend
 
-# Volumen para que los datos no se borren cuando apagues Docker
-volumes:
-  postgres_data:
+  # -------------------------------------------------------------
+  # [PREPARADO A FUTURO] Componente: Frontend
+  # -------------------------------------------------------------
+  # Cuando crees tu frontend, solo debes descomentar las líneas de abajo:
+  # frontend:
+  #   build:
+  #     context: ./frontend  # O la carpeta donde decidas ponerlo
+  #     dockerfile: dockerfile
+  #   container_name: flowbox_frontend
+  #   restart: always
+  #   ports:
+  #     - "3000:3000"        # O el puerto que use tu framework (React, Angular, Next, etc.)
+  #   networks:
+  #     - flowbox-network
+
+# Red interna de Docker para que los componentes se comuniquen de forma segura
+networks:
+  flowbox-network:
+    driver: bridge
