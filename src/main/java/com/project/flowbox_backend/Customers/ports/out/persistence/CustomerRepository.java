@@ -1,4 +1,4 @@
-package com.project.flowbox_backend.Customers.ports.out;
+package com.project.flowbox_backend.Customers.ports.out.persistence;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
