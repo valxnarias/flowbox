@@ -26,7 +26,7 @@ public class CustomerServiceTest {
     @Test
     public void testCreateCustomer_SavesToData(){
         //Arrange: preparar los datos de entrada
-        CustomerDTO customerDTO = new CustomerDTO(12345678L, "John", "Doe", 1234567890L);
+        CustomerDTO customerDTO = new CustomerDTO("12345678", "John", "Doe", "1234567890");
 
         //Act: Ejecutar el metodo real del servicio
         customerService.create(customerDTO);
@@ -41,10 +41,10 @@ public class CustomerServiceTest {
         Customer savedCustomer = captor.getValue();
 
         // ¡Verificamos que el Mapper haya hecho su trabajo a la perfección!
-        assertEquals(12345678L, savedCustomer.getDni());
+        assertEquals("12345678", savedCustomer.getDni());
         assertEquals("John", savedCustomer.getNombre());
         assertEquals("Doe", savedCustomer.getApellido());
-        assertEquals(1234567890L, savedCustomer.getTelefono());
+        assertEquals("1234567890", savedCustomer.getTelefono());
     }
     //TODO: hacer sad path
 }

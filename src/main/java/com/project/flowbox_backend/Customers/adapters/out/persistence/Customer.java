@@ -2,19 +2,21 @@ package com.project.flowbox_backend.Customers.adapters.out.persistence;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "customer")
+@Table(name = "customers", schema = "business")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Customer {
+    @Id
     @Column(name = "dni")
-    private long dni;
+    private String dni;
 
     @Column(name = "nombre")
     private String nombre;
@@ -23,6 +25,6 @@ public class Customer {
     private String apellido;
 
     @Column(name = "telefono")
-    private Long telefono;
+    private String telefono;
 
 }

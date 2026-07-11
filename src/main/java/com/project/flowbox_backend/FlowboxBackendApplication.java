@@ -9,5 +9,4 @@ public class FlowboxBackendApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(FlowboxBackendApplication.class, args);
 	}
-
 }

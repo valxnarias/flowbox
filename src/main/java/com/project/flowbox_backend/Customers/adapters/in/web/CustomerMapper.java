@@ -19,7 +19,7 @@ public class CustomerMapper {
 
     public static Customer toEntity(CustomerDTO customerDTO){
         Customer customer = new Customer();
-        customer.setDni(customerDTO.getdni());
+        customer.setDni(customerDTO.getDni());
         customer.setNombre(customerDTO.getNombre());
         customer.setApellido(customerDTO.getApellido());
         customer.setTelefono(customerDTO.getTelefono());

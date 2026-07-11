@@ -18,7 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.flowbox_backend.Customers.Services.CustomerService;
 import com.project.flowbox_backend.Customers.adapters.in.web.DTO.CustomerDTO;
 
-@WebMvcTest (CustomerController.class)
+@WebMvcTest(CustomerController.class)
 public class CustomerControllerTest {
 
     @Autowired
@@ -30,13 +30,13 @@ public class CustomerControllerTest {
     @MockitoBean
     private CustomerService customerService;
 
-//TESTS para path: /api/v1/customers
+    // TESTS para path: /api/v1/customers
     @SuppressWarnings("null")
     @Test
     public void testCreateCustomer_Returns201() throws Exception {
         // Arrange: Preparamos los datos del DTO
-        CustomerDTO newCustomer = new CustomerDTO(50734782L, "Juan", "Pérez", 2994636441L);
-        
+        CustomerDTO newCustomer = new CustomerDTO("50734782", "Juan", "Pérez", "2994636441");
+
         // Transformamos el objeto a un String en formato JSON
         String jsonBody = objectMapper.writeValueAsString(newCustomer);
 
@@ -46,30 +46,31 @@ public class CustomerControllerTest {
                 .content(jsonBody))
                 .andExpect(status().isCreated());
 
-        //Refactor: NUEVO ASSERT: Verificamos la interacción interna
+        // Refactor: NUEVO ASSERT: Verificamos la interacción interna
         verify(customerService).create(any(CustomerDTO.class));
     }
 
     @SuppressWarnings("null")
     @ParameterizedTest
     @CsvSource({
-        " , Valentin, Arias",
-        "48732633, ,Arias",
-        "48734400, Valentin, "
+            " , Valentin, Arias",
+            "48732633, ,Arias",
+            "48734400, Valentin, "
     })
-    public void testCreateCustomer_return400(Long dni, String nombre, String apellido) throws Exception {
-        //Arrange: Preparar los datos del DTO
-        CustomerDTO invalidCustomer = new CustomerDTO(dni, nombre, apellido, 2994576110L);
+    public void testCreateCustomer_return400(String dni, String nombre, String apellido) throws Exception {
+        // Arrange: Preparar los datos del DTO
+        CustomerDTO invalidCustomer = new CustomerDTO(dni, nombre, apellido, "2994576110");
 
-        //Transformar el objeto a un String en formato json
+        // Transformar el objeto a un String en formato json
         String jsonBody = objectMapper.writeValueAsString(invalidCustomer);
 
-        //Act & Assert: Simular el POSt con datos inválidos y verificar el status 400
+        // Act & Assert: Simular el POSt con datos inválidos y verificar el status 400
         mockMvc.perform(post("/api/v1/customers")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(jsonBody))
-            .andExpect(status().isBadRequest());
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonBody))
+                .andExpect(status().isBadRequest());
 
     }
-    //TODO: Agregar más pruebas para otros escenarios, como verificar size, numeros negativos, etc.
+    // TODO: Agregar más pruebas para otros escenarios, como verificar size, numeros
+    // negativos, etc.
 }

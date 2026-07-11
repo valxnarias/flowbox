@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 
 public class CustomerDTO {
     @NotNull
-    private Long dni;
+    private String dni;
 
     @NotBlank
     private String nombre;
@@ -13,20 +13,20 @@ public class CustomerDTO {
     @NotBlank
     private String apellido;
 
-    private Long telefono;
+    private String telefono;
 
-    public CustomerDTO(Long dni, String nombre, String apellido, Long telefono) {
+    public CustomerDTO(String dni, String nombre, String apellido, String telefono) {
         this.dni = dni;
         this.nombre = nombre;
         this.apellido = apellido;
         this.telefono = telefono;
     }
 
-    public Long getdni() {
+    public String getDni() {
         return dni;
     }
 
-    public void setDni(Long dni) {
+    public void setDni(String dni) {
         this.dni = dni;
     }
 
@@ -46,11 +46,11 @@ public class CustomerDTO {
         this.apellido = apellido;
     }
 
-    public Long getTelefono() {
+    public String getTelefono() {
         return telefono;
     }
 
-    public void setTelefono(Long telefono) {
+    public void setTelefono(String telefono) {
         this.telefono = telefono;
     }
 }
