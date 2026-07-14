@@ -182,4 +182,8 @@ public class CustomerControllerTest {
         }
         // ======================================== END TESTS para path GET
         // /api/v1/customers========================================
+
+        // ======================================== TESTS para path GET
+        // /api/v1/customers/{id}========================================
+
 }

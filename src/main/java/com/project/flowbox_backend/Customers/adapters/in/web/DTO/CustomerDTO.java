@@ -13,7 +13,7 @@ public class CustomerDTO {
 
     @NotBlank(message = "El apellido no puede estar vacio")
     private String apellido;
-    @Pattern(regexp = "^[0-9]{10}$", message = "El telefono debe contener exactamente 10 digitos numericos.")
+    @Pattern(regexp = "^([0-9]{10})?$", message = "El telefono debe contener exactamente 10 digitos numericos.")
     private String telefono;
 
     public CustomerDTO(String dni, String nombre, String apellido, String telefono) {
