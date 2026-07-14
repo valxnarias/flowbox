@@ -1,6 +1,8 @@
 package com.project.flowbox_backend.Customers.Services;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -41,5 +43,11 @@ public class CustomerService {
 
         // Ahora el IDE sabe que aquí 'entity' es 100% seguro
         repository.save(entity);
+    }
+
+    public List<CustomerDTO> findAll() {
+        return repository.findAll().stream()
+                .map(CustomerMapper::toDTO)
+                .collect(Collectors.toList());
     }
 }

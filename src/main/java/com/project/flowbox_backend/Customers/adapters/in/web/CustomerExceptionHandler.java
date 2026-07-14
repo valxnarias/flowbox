@@ -16,4 +16,10 @@ public class CustomerExceptionHandler {
         return ex.getMessage();
     }
 
+    @ExceptionHandler(RuntimeException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public String handleRuntimeException(RuntimeException ex) {
+        return "Ocurrió un error inesperado en el servidor: " + ex.getMessage();
+    }
+
 }
