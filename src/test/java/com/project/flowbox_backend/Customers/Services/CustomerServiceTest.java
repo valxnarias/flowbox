@@ -11,6 +11,7 @@ import static org.mockito.Mockito.*;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -75,7 +76,7 @@ public class CustomerServiceTest {
         when(customerRepository.findAll()).thenReturn(mockCustomers);
 
         // 2. Act & Assert: Ejecutamos el método y validamos el resultado
-        List<CustomerDTO> result = customerService.findAll();
+        List<CustomerDTO> result = customerService.findAll(Optional.empty());
         assertNotNull(result);
         assertEquals(2, result.size());
         assertEquals("John", result.get(0).getNombre());
@@ -95,7 +96,7 @@ public class CustomerServiceTest {
         when(customerRepository.findAll()).thenReturn(java.util.Collections.emptyList());
 
         // Act
-        List<CustomerDTO> result = customerService.findAll();
+        List<CustomerDTO> result = customerService.findAll(Optional.empty());
 
         // Assert
         assertNotNull(result);

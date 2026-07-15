@@ -1,6 +1,7 @@
 package com.project.flowbox_backend.Customers.adapters.in.web;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.project.flowbox_backend.Customers.adapters.in.web.DTO.CustomerDTO;
@@ -33,7 +35,7 @@ class CustomerController {
     }
 
     @GetMapping
-    public ResponseEntity<List<CustomerDTO>> getAllCustomers() {
-        return ResponseEntity.ok(customerService.findAll());
+    public ResponseEntity<List<CustomerDTO>> getCustomers(@RequestParam(required = false) String search) {
+        return ResponseEntity.ok(customerService.findAll(Optional.ofNullable(search)));
     }
 }

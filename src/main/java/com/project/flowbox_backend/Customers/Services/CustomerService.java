@@ -2,6 +2,7 @@ package com.project.flowbox_backend.Customers.Services;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -45,7 +46,19 @@ public class CustomerService {
         repository.save(entity);
     }
 
-    public List<CustomerDTO> findAll() {
+    public List<CustomerDTO> findAll(Optional<String> search) {
+        if (search.isPresent()) {
+            String searchTerm = search.get();
+            if (searchTerm.trim().isEmpty()) {
+                return repository.findAll().stream()
+                        .map(CustomerMapper::toDTO)
+                        .collect(Collectors.toList());
+            } else {
+                return repository.searchGlobal(searchTerm).stream()
+                        .map(CustomerMapper::toDTO)
+                        .collect(Collectors.toList());
+            }
+        }
         return repository.findAll().stream()
                 .map(CustomerMapper::toDTO)
                 .collect(Collectors.toList());

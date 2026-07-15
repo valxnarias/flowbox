@@ -17,6 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -135,7 +136,7 @@ public class CustomerControllerTest {
                                 .andExpect(status().isConflict());
         }
         // ======================================== END TESTS para path:
-        // /api/v1/customers========================================
+        // POST /api/v1/customers========================================
 
         // ======================================== TESTS para path: GET
         // /api/v1/customers========================================
@@ -149,7 +150,7 @@ public class CustomerControllerTest {
 
                 // Mockeamos el servicio para que cuando el controlador llame a buscar a todos,
                 // devuelva una lista
-                when(customerService.findAll()).thenReturn(customerList);
+                when(customerService.findAll(Optional.empty())).thenReturn(customerList);
 
                 // Act & Assert: Simulamos el GET y verificamos el status 200
                 mockMvc.perform(get("/api/v1/customers")
@@ -163,14 +164,14 @@ public class CustomerControllerTest {
                                 .andExpect(jsonPath("$[0].apellido").value("Perez"));
 
                 // Refactor: verificar que llame al metodo del servicio
-                verify(customerService).findAll();
+                verify(customerService).findAll(Optional.empty());
         }
 
         @SuppressWarnings("null")
         @Test
         public void testGetAllCustomers_ServiceThrowsException_Returns500() throws Exception {
                 // Arrange: Simulamos que el servicio falla con un error de la base de datos
-                when(customerService.findAll()).thenThrow(new RuntimeException("DataBase connection failed"));
+                when(customerService.findAll(Optional.empty())).thenThrow(new RuntimeException("DataBase connection failed"));
 
                 // Act & Assert: Llamamos al endpoint GET y esperamos un error 500
                 mockMvc.perform(get("/api/v1/customers")
@@ -178,12 +179,32 @@ public class CustomerControllerTest {
                                 .andExpect(status().isInternalServerError()); // 500
 
                 // Verificamos que el método del servicio fue llamado
-                verify(customerService).findAll();
+                verify(customerService).findAll(Optional.empty());
         }
+
+        @Test
+        public void testGetAllCustomers_WithSearchParam_ReturnsFilteredList() throws Exception {
+                // Arrange
+                CustomerDTO customer = createCustomerDTO();
+                List<CustomerDTO> filteredList = List.of(customer);
+
+                // Simulamos que al buscar "Juan", el servicio devuelve la lista filtrada
+                when(customerService.findAll(Optional.of("Juan"))).thenReturn(filteredList);
+
+                // Act & Assert: Hacemos GET a /api/v1/customers?search=Juan
+                mockMvc.perform(get("/api/v1/customers")
+                                .param("search", "Juan") // Agregamos el Query Param
+                                .contentType(MediaType.APPLICATION_JSON))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$").isArray())
+                                .andExpect(jsonPath("$.length()").value(1))
+                                .andExpect(jsonPath("$[0].nombre").value("Juan"));
+
+                // Verificamos que se haya invocado al servicio con el parámetro "Juan"
+                verify(customerService).findAll(Optional.of("Juan"));
+        }
+
         // ======================================== END TESTS para path GET
         // /api/v1/customers========================================
-
-        // ======================================== TESTS para path GET
-        // /api/v1/customers/{id}========================================
 
 }
