@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.project.flowbox_backend.Customers.adapters.in.web.DTO.CustomerDTO;
 import com.project.flowbox_backend.Customers.adapters.out.persistence.Customer;
 import com.project.flowbox_backend.Customers.domain.exceptions.CustomerAlreadyExistsException;
+import com.project.flowbox_backend.Customers.domain.exceptions.CustomerNotFoundException;
 import com.project.flowbox_backend.Customers.ports.out.persistence.CustomerRepository;
 
 @SuppressWarnings("null")
@@ -102,6 +103,36 @@ public class CustomerServiceTest {
         assertNotNull(result);
         assertTrue(result.isEmpty());
         verify(customerRepository).findAll();
+    }
+
+    @Test
+    public void testDeleteCustomer_DeletesSuccessfully() {
+        // 1. Arrange: Configuramos el mock para que crea que el cliente existe
+        when(customerRepository.existsById("12345678")).thenReturn(true);
+
+        String dniToDelete = "12345678";
+
+        // 2. Act: Ejecutamos el método delete
+        customerService.delete(dniToDelete);
+
+        // 3. Assert: Verificamos que el método deleteById del repositorio fue llamado
+        verify(customerRepository, times(1)).deleteById(dniToDelete);
+    }
+
+    @Test
+    public void testDeleteCustomer_NotFound_ThrowsException() {
+        // 1. Arrange: Configuramos el mock para que crea que el cliente NO existe
+        when(customerRepository.existsById("12345678")).thenReturn(false);
+
+        String dniToDelete = "12345678";
+
+        // 2. Act & Assert: Verificamos que se lance la excepción esperada
+        assertThrows(CustomerNotFoundException.class, () -> {
+            customerService.delete(dniToDelete);
+        });
+
+        // Opcional: Verificar que deleteById NO se llamó nunca
+        verify(customerRepository, never()).deleteById(anyString());
     }
 
 }
