@@ -6,6 +6,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.project.flowbox_backend.Customers.domain.exceptions.CustomerAlreadyExistsException;
+import com.project.flowbox_backend.Customers.domain.exceptions.CustomerNotFoundException;
+
+import jakarta.validation.ConstraintViolationException;
 
 @RestControllerAdvice
 public class CustomerExceptionHandler {
@@ -22,4 +25,15 @@ public class CustomerExceptionHandler {
         return "Ocurrió un error inesperado en el servidor: " + ex.getMessage();
     }
 
+    @ExceptionHandler(CustomerNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String handleCustomerNotFoundException(CustomerNotFoundException ex) {
+        return ex.getMessage();
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public String handleConstraintViolationException(ConstraintViolationException ex) {
+        return ex.getMessage();
+    }
 }

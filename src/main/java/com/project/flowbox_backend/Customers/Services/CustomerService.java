@@ -11,6 +11,7 @@ import com.project.flowbox_backend.Customers.adapters.in.web.CustomerMapper;
 import com.project.flowbox_backend.Customers.adapters.in.web.DTO.CustomerDTO;
 import com.project.flowbox_backend.Customers.adapters.out.persistence.Customer;
 import com.project.flowbox_backend.Customers.domain.exceptions.CustomerAlreadyExistsException;
+import com.project.flowbox_backend.Customers.domain.exceptions.CustomerNotFoundException;
 import com.project.flowbox_backend.Customers.ports.out.persistence.CustomerRepository;
 
 @Service
@@ -62,5 +63,12 @@ public class CustomerService {
         return repository.findAll().stream()
                 .map(CustomerMapper::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    public void delete(String dni) {
+        if (!repository.existsById(dni)) {
+            throw new CustomerNotFoundException("El cliente con DNI " + dni + " no existe.");
+        }
+        repository.deleteById(dni);
     }
 }

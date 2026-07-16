@@ -19,6 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.List;
 import java.util.Optional;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
@@ -26,6 +27,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.flowbox_backend.Customers.Services.CustomerService;
 import com.project.flowbox_backend.Customers.adapters.in.web.DTO.CustomerDTO;
 import com.project.flowbox_backend.Customers.domain.exceptions.CustomerAlreadyExistsException;
+import com.project.flowbox_backend.Customers.domain.exceptions.CustomerNotFoundException;
 
 @WebMvcTest(CustomerController.class)
 public class CustomerControllerTest {
@@ -171,7 +173,8 @@ public class CustomerControllerTest {
         @Test
         public void testGetAllCustomers_ServiceThrowsException_Returns500() throws Exception {
                 // Arrange: Simulamos que el servicio falla con un error de la base de datos
-                when(customerService.findAll(Optional.empty())).thenThrow(new RuntimeException("DataBase connection failed"));
+                when(customerService.findAll(Optional.empty()))
+                                .thenThrow(new RuntimeException("DataBase connection failed"));
 
                 // Act & Assert: Llamamos al endpoint GET y esperamos un error 500
                 mockMvc.perform(get("/api/v1/customers")
@@ -206,5 +209,71 @@ public class CustomerControllerTest {
 
         // ======================================== END TESTS para path GET
         // /api/v1/customers========================================
+
+        // ======================================== TESTS para path DELETE
+        // /api/v1/customers/{dni} ========================================
+        @SuppressWarnings("null")
+        @Test
+        public void testDeleteCustomer_CustomerExists_Returns204() throws Exception {
+                // Arrange: Preparamos el DNI del cliente a eliminar
+                String dni = "12345678";
+
+                // Act & Assert: Simulamos el DELETE y verificamos el status 204
+                mockMvc.perform(delete("/api/v1/customers/" + dni)
+                                .contentType(MediaType.APPLICATION_JSON))
+                                .andExpect(status().isNoContent());
+
+                // Verificamos que el método del servicio fue llamado
+                verify(customerService).delete(dni);
+        }
+
+        @SuppressWarnings("null")
+        @Test
+        public void testDeleteCustomer_CustomerNotExists_Returns404() throws Exception {
+                // Arrange: Preparamos el DNI del cliente a eliminar
+                String dni = "12345678";
+                // Cuando el controlador llama al método delete con cualquier String, lanzamos
+                // CustomerNotFoundException
+                doThrow(new CustomerNotFoundException("El cliente con DNI " + dni + " no existe."))
+                                .when(customerService).delete(any(String.class));
+                // Act & Assert: Simulamos el DELETE y verificamos el status 404
+                mockMvc.perform(delete("/api/v1/customers/" + dni)
+                                .contentType(MediaType.APPLICATION_JSON))
+                                .andExpect(status().isNotFound());
+
+                // Verificamos que el método del servicio fue llamado
+                verify(customerService).delete(any(String.class));
+        }
+
+        @SuppressWarnings("null")
+        @ParameterizedTest
+        @CsvSource(value = {
+                        "abc",
+                        "123456789",
+                        "1234567",
+                        "-12345678"
+        })
+        public void testDeleteCustomer_DniInvalid_Returns400(String dni) throws Exception {
+                // Act & Assert: Simulamos el DELETE y verificamos el status 400
+                mockMvc.perform(delete("/api/v1/customers/" + dni)
+                                .contentType(MediaType.APPLICATION_JSON))
+                                .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        public void testDeleteCustomer_DniEmpty_Returns405() throws Exception {
+                // Act & Assert
+                mockMvc.perform(delete("/api/v1/customers/")
+                                .contentType(MediaType.APPLICATION_JSON))
+                                .andExpect(status().isNotFound());
+        }
+
+        @Test
+        public void testDeleteCustomer_DniBlankSpace_Returns404() throws Exception {
+                // Act & Assert
+                mockMvc.perform(delete("/api/v1/customers/ ")
+                                .contentType(MediaType.APPLICATION_JSON))
+                                .andExpect(status().isBadRequest());
+        }
 
 }
