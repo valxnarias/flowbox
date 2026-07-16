@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.project.flowbox_backend.Customers.domain.exceptions.CustomerAlreadyExistsException;
 import com.project.flowbox_backend.Customers.domain.exceptions.CustomerNotFoundException;
+import com.project.flowbox_backend.Customers.domain.exceptions.MismatchedDniException;
 
 import jakarta.validation.ConstraintViolationException;
 
@@ -34,6 +35,12 @@ public class CustomerExceptionHandler {
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public String handleConstraintViolationException(ConstraintViolationException ex) {
+        return ex.getMessage();
+    }
+
+    @ExceptionHandler(MismatchedDniException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public String handleMismatchedDniException(MismatchedDniException ex) {
         return ex.getMessage();
     }
 }

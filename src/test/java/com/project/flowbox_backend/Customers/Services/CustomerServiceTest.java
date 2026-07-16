@@ -135,4 +135,30 @@ public class CustomerServiceTest {
         verify(customerRepository, never()).deleteById(anyString());
     }
 
+    @Test
+    public void testUpdateCustomer_UpdateSucessfully() {
+        // 1. Arrange: Configuramos el mock para que crea que el cliente existe
+        when(customerRepository.findById("12345678"))
+                .thenReturn(Optional.of(new Customer("12345678", "John", "Doe", "1234567890")));
+        // Arrange: preparar los datos de entrada
+        CustomerDTO customerDTO = new CustomerDTO("12345678", "John", "Doe", "1234567890");
+        // 2. Act & Assert: Verificamos que al llamar a update, lance la excepción
+        customerService.update("12345678", customerDTO);
+        verify(customerRepository, times(1)).findById(anyString());
+    }
+
+    @Test
+    public void testUpdateCustomer_NotFound_ThrowsException() {
+        // 1. Arrange: Configuramos el mock para que crea que el cliente NO existe
+        when(customerRepository.findById("12345678")).thenReturn(Optional.empty());
+
+        String dniToUpdate = "12345678";
+        CustomerDTO customerDTO = new CustomerDTO("12345678", "John", "Doe", "1234567890");
+
+        // 2. Act & Assert: Verificamos que se lance la excepción esperada
+        assertThrows(CustomerNotFoundException.class, () -> {
+            customerService.update(dniToUpdate, customerDTO);
+        });
+
+    }
 }

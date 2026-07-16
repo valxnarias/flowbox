@@ -10,8 +10,12 @@ import static org.mockito.Mockito.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -22,6 +26,7 @@ import java.util.Optional;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.flowbox_backend.Customers.Services.CustomerService;
@@ -275,5 +280,104 @@ public class CustomerControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON))
                                 .andExpect(status().isBadRequest());
         }
+        // ======================================== END TESTS para path DELETE
+        // /api/v1/customers========================================
+        // ======================================== TESTS para path PUT
+        // /api/v1/customers/{dni}========================================
 
+        @SuppressWarnings("null")
+        @Test
+        public void testUpdateCustomer_CustomerExists_Returns200() throws Exception {
+                // Arrange: preparamos el cuerpo del customer a actualizar
+                String dni = "12345678";
+                CustomerDTO updatedCustomer = createCustomerDTO();
+                updatedCustomer.setNombre("Juan Actualizado");
+
+                String jsonValue = objectMapper.writeValueAsString(updatedCustomer);
+
+                // Act & Assert: Simulamos el PUT y verificamos el status 200
+                mockMvc.perform(put("/api/v1/customers/" + dni)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(jsonValue))
+                                .andExpect(status().isOk());
+
+                // Verificamos que llame al metodo update del servicio
+                verify(customerService).update(any(String.class), any(CustomerDTO.class));
+        }
+
+        @SuppressWarnings("null")
+        @Test
+        public void testUpdateCustomer_CustomerNotExists_Returns404() throws Exception {
+                // Arrange: preparamos el cuerpo del customer a actualizar
+                String dni = "12345678";
+                CustomerDTO updatedCustomer = createCustomerDTO();
+                updatedCustomer.setNombre("Juan Actualizado");
+
+                String jsonValue = objectMapper.writeValueAsString(updatedCustomer);
+
+                doThrow(new CustomerNotFoundException("El cliente con DNI " + dni + " no existe."))
+                                .when(customerService).update(any(String.class), any(CustomerDTO.class));
+                // Act & Assert: Simulamos el PUT y verificamos el status 404
+                mockMvc.perform(put("/api/v1/customers/" + dni)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(jsonValue))
+                                .andExpect(status().isNotFound());
+
+                // Verificamos que llame al metodo update del servicio
+                verify(customerService).update(any(String.class), any(CustomerDTO.class));
+        }
+
+        @SuppressWarnings("null")
+        @ParameterizedTest
+        @CsvSource(value = {
+                        "abc",
+                        "123456789",
+                        "1234567",
+                        "-12345678"
+        })
+        public void testUpdateCustomer_InvalidDni_Returns400(String dni) throws Exception {
+                // Arrange: preparamos el cuerpo del customer a actualizar
+                CustomerDTO updatedCustomer = createCustomerDTO();
+                updatedCustomer.setNombre("Juan Actualizado");
+
+                String jsonValue = objectMapper.writeValueAsString(updatedCustomer);
+
+                // Act & Assert: Simulamos el PUT y verificamos el status 400
+                mockMvc.perform(put("/api/v1/customers/" + dni)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(jsonValue))
+                                .andExpect(status().isBadRequest());
+
+        }
+
+        @Test
+        public void testUpdateCustomer_EmptyDni_Returns404() throws Exception {
+                // Arrange: preparamos el cuerpo del customer a actualizar
+                CustomerDTO updatedCustomer = createCustomerDTO();
+                updatedCustomer.setNombre("Juan Actualizado");
+
+                String jsonValue = objectMapper.writeValueAsString(updatedCustomer);
+
+                // Act & Assert: Simulamos el PUT y verificamos el status 400
+                mockMvc.perform(put("/api/v1/customers/")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(jsonValue))
+                                .andExpect(status().isNotFound());
+        }
+
+        @Test
+        public void testUpdateCustomer_DniNotMatch_Returns400() throws Exception {
+                // Arrange: preparamos el cuerpo del customer a actualizar
+                String dni = "87654321";
+                CustomerDTO updatedCustomer = createCustomerDTO();
+                updatedCustomer.setNombre("Juan Actualizado");
+
+                String jsonValue = objectMapper.writeValueAsString(updatedCustomer);
+
+                // Act & Assert: Simulamos el PUT y verificamos el status 400
+                mockMvc.perform(put("/api/v1/customers/" + dni)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(jsonValue))
+                                .andExpect(status().isBadRequest());
+        }
 }

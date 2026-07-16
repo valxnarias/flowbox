@@ -10,12 +10,15 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.project.flowbox_backend.Customers.adapters.in.web.DTO.CustomerDTO;
+import com.project.flowbox_backend.Customers.domain.exceptions.CustomerNotFoundException;
+import com.project.flowbox_backend.Customers.domain.exceptions.MismatchedDniException;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -53,4 +56,15 @@ class CustomerController {
         return ResponseEntity.noContent().build();
     }
 
+    @PutMapping("/{dni}")
+    public ResponseEntity<CustomerDTO> updateCustomer(
+            @PathVariable @NotNull(message = "El Dni no puede ser null") @NotBlank(message = "El Dni no puede estar vacio") @Pattern(regexp = "^[0-9]{8}$", message = "El Dni debe tener 8 digitos") String dni,
+            @RequestBody @Valid CustomerDTO customerDTO) {
+
+        if (!customerDTO.getDni().equals(dni)) {
+            throw new MismatchedDniException("El Dni del cliente no coincide con el Dni proporcionado.");
+        }
+        customerService.update(dni, customerDTO);
+        return ResponseEntity.ok(customerDTO);
+    }
 }

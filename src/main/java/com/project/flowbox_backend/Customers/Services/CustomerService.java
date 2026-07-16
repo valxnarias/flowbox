@@ -14,6 +14,8 @@ import com.project.flowbox_backend.Customers.domain.exceptions.CustomerAlreadyEx
 import com.project.flowbox_backend.Customers.domain.exceptions.CustomerNotFoundException;
 import com.project.flowbox_backend.Customers.ports.out.persistence.CustomerRepository;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class CustomerService {
 
@@ -70,5 +72,14 @@ public class CustomerService {
             throw new CustomerNotFoundException("El cliente con DNI " + dni + " no existe.");
         }
         repository.deleteById(dni);
+    }
+
+    @Transactional
+    public void update(String dni, CustomerDTO customerDTO) {
+        Customer customer = repository.findById(dni)
+                .orElseThrow(() -> new CustomerNotFoundException("El cliente con DNI " + dni + " no existe."));
+        customer.setNombre(customerDTO.getNombre());
+        customer.setApellido(customerDTO.getApellido());
+        customer.setTelefono(customerDTO.getTelefono());
     }
 }
